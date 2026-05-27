@@ -3,11 +3,10 @@ import type { CategoryCounts } from "@/types/message";
 interface DailyBriefHeaderProps {
   counts: CategoryCounts;
   flagCount: number;
-  onCopyBrief: () => void;
   onUpload: (file: File) => void;
 }
 
-export function DailyBriefHeader({ counts, flagCount, onCopyBrief, onUpload }: DailyBriefHeaderProps) {
+export function DailyBriefHeader({ counts, flagCount, onUpload }: DailyBriefHeaderProps) {
   return (
     <header className="brief-header">
       <div className="brief-title-block">
@@ -31,9 +30,6 @@ export function DailyBriefHeader({ counts, flagCount, onCopyBrief, onUpload }: D
           />
           <span>Load JSON</span>
         </label>
-        <button className="primary-button" type="button" onClick={onCopyBrief}>
-          Copy brief
-        </button>
       </div>
     </header>
   );

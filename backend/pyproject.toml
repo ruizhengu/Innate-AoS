@@ -6,6 +6,9 @@ requires-python = ">=3.10"
 dependencies = []
 
 [project.scripts]
+aos-api = "aos.api.server:main"
+aos-generate-briefing = "aos.briefing.cli:main"
+aos-refresh-frontend-briefing = "aos.briefing.refresh_frontend:main"
 aos-triage = "aos.triage.cli:main"
 aos-refresh-frontend-triage = "aos.triage.refresh_frontend:main"
 aos-benchmark-models = "aos.triage.benchmark:main"

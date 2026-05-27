@@ -35,3 +35,29 @@ export interface BackendTriageResult {
   suggested_owner: string;
   drafted_response: string;
 }
+
+export interface DailyBriefingItem {
+  title?: string;
+  summary: string;
+  message_ids: number[];
+}
+
+export interface DailyBriefingFlag {
+  severity: "critical" | "high" | "medium" | "low" | string;
+  summary: string;
+  message_ids: number[];
+}
+
+export interface DailyBriefingAction {
+  owner: string;
+  action: string;
+  message_ids: number[];
+}
+
+export interface DailyBriefing {
+  headline: string;
+  top_priority: DailyBriefingItem & { message_id?: number };
+  sections: DailyBriefingItem[];
+  flags: DailyBriefingFlag[];
+  next_actions: DailyBriefingAction[];
+}

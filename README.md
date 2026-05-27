@@ -112,6 +112,20 @@ cd backend
 uv run aos-benchmark-models ../Messages.json --output benchmark-results.json
 ```
 
+Generate the daily briefing from existing triage results:
+
+```bash
+cd backend
+uv run aos-generate-briefing --triage triage-results.json --output daily-briefing.json
+```
+
+Refresh the frontend daily briefing artifact:
+
+```bash
+cd backend
+uv run aos-refresh-frontend-briefing
+```
+
 ## Manual Evaluation
 
 Start with the small hand-labeled set in
@@ -137,7 +151,16 @@ Then compare `triage-results.json` against
 
 ## Run the Frontend
 
-The CEO-facing web UI is a Next.js app in `frontend/`:
+The CEO-facing web UI is a Next.js app in `frontend/`. Start the Python backend
+API first if you want the **Regenerate** button in the draft composer to call
+Z.AI:
+
+```bash
+cd backend
+uv run aos-api
+```
+
+Then start the frontend in another terminal:
 
 ```bash
 cd frontend
@@ -148,9 +171,8 @@ npm run dev
 Then open <http://localhost:3000>. It ships with the provided `Messages.json`
 data embedded so reviewers can see the dashboard immediately. Use **Load JSON**
 in the top right to test another message file with the same array schema. The
-browser-side analyzer provides an instant demo path, while the backend
-`aos-triage` command remains the LLM-backed path for production-quality
-classifications.
+browser-side analyzer provides an instant demo path, while `aos-triage` remains
+the LLM-backed path for production-quality classifications.
 
 ## Example Usage in Future Backend Code
 

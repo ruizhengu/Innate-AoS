@@ -1,0 +1,126 @@
+{
+  "headline": "Production issue impacting 3% of checkout transactions requires immediate decision; Series B investor meeting rescheduled to 10am Thursday",
+  "top_priority": {
+    "message_id": 16,
+    "title": "Live checkout failures - rollback vs hotfix decision needed",
+    "summary": "Payment service dependency issue is causing intermittent checkout failures for ~3% of users. Engineering needs a decision within the hour: roll back (safer, but 2-week setback) or push a hotfix (faster, but riskier)."
+  },
+  "sections": [
+    {
+      "title": "Investor Relations",
+      "summary": "Series B due diligence with Meridian Ventures moved to 10am Thursday (from 2pm) to avoid internal meeting conflicts. Revenue projections must be delivered by Wednesday EOD ahead of their partners meeting Monday.",
+      "message_ids": [
+        1,
+        10,
+        18
+      ]
+    },
+    {
+      "title": "Commercial Decisions",
+      "summary": "Northwind deal structure changed: client wants 1-year term instead of 2-year, dropping ARR from 120k to 60k. Decision needed by EOD on whether to accept or push back.",
+      "message_ids": [
+        12,
+        19
+      ]
+    },
+    {
+      "title": "Executive Hiring",
+      "summary": "VP Engineering shortlist received (4 candidates). Recruiter recommends prioritizing ex-Stripe and ex-Datadog candidates. Intro calls need scheduling for next week.",
+      "message_ids": [
+        8
+      ]
+    },
+    {
+      "title": "People & Culture",
+      "summary": "Engineering team grumbling about hybrid policy being introduced without consultation. Benefits package sign-off needed by Friday EOD to lock in rates before March 21st.",
+      "message_ids": [
+        13
+      ]
+    },
+    {
+      "title": "Resolved Items",
+      "summary": "Horizon project timeline concern resolved internally - David and Lisa aligned on revised 10-week timeline with phased delivery approach. Board deck review remains on original Thursday schedule as finance can deliver preliminary Q1 numbers by tomorrow.",
+      "message_ids": [
+        3,
+        6,
+        10,
+        17
+      ]
+    }
+  ],
+  "flags": [
+    {
+      "severity": "critical",
+      "summary": "Live checkout failures affecting 3% of users - executive decision required within the hour",
+      "message_ids": [
+        16
+      ]
+    },
+    {
+      "severity": "high",
+      "summary": "Northwind deal ARR cut in half - 60k at risk if no response by EOD",
+      "message_ids": [
+        19
+      ]
+    },
+    {
+      "severity": "high",
+      "summary": "Benefits package sign-off deadline Friday EOD - rate lock expires March 21st",
+      "message_ids": [
+        13
+      ]
+    },
+    {
+      "severity": "medium",
+      "summary": "Engineering morale issue on hybrid policy needs addressing before it escalates",
+      "message_ids": [
+        13
+      ]
+    }
+  ],
+  "next_actions": [
+    {
+      "owner": "CEO",
+      "action": "Make immediate decision on payment service rollback vs hotfix",
+      "message_ids": [
+        16
+      ]
+    },
+    {
+      "owner": "CEO",
+      "action": "Decide on Northwind deal counter-proposal by EOD",
+      "message_ids": [
+        19
+      ]
+    },
+    {
+      "owner": "CEO",
+      "action": "Confirm Meridian meeting at 10am Thursday and ensure CFO delivers revenue projections by Wednesday",
+      "message_ids": [
+        1,
+        18
+      ]
+    },
+    {
+      "owner": "CEO",
+      "action": "Review and sign off on benefits package by Thursday EOD",
+      "message_ids": [
+        13
+      ]
+    },
+    {
+      "owner": "CEO",
+      "action": "Schedule VP Engineering intro calls with top 2 candidates for next week",
+      "message_ids": [
+        8
+      ]
+    },
+    {
+      "owner": "CEO",
+      "action": "Brief chat with Alex (Head of People) about hybrid policy feedback",
+      "message_ids": [
+        13
+      ]
+    }
+  ]
+}

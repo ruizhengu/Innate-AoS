@@ -5,11 +5,12 @@ import { BriefEntryList } from "@/components/BriefEntryList";
 import { BriefFilters } from "@/components/BriefFilters";
 import { BriefSummary } from "@/components/BriefSummary";
 import { DailyBriefHeader } from "@/components/DailyBriefHeader";
+import { DraftComposer } from "@/components/DraftComposer";
+import { MessageDetailModal } from "@/components/MessageDetailModal";
 import { Toast } from "@/components/Toast";
-import { buildPlainTextBrief } from "@/lib/briefing";
-import { copyText } from "@/lib/clipboard";
+import { regenerateDraft } from "@/lib/drafts";
 import { analyzeMessages, countByCategory } from "@/lib/triage";
-import type { IncomingMessage, TriageCategory } from "@/types/message";
+import type { IncomingMessage, TriageAnalysis, TriageCategory } from "@/types/message";
 
 interface ExecutiveDashboardProps {
   initialMessages: IncomingMessage[];
@@ -18,28 +19,41 @@ interface ExecutiveDashboardProps {
 export function ExecutiveDashboard({ initialMessages }: ExecutiveDashboardProps) {
   const [messages, setMessages] = useState(initialMessages);
   const [activeFilter, setActiveFilter] = useState<TriageCategory | "all">("all");
-  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [activeDetails, setActiveDetails] = useState<TriageAnalysis | null>(null);
+  const [activeDraft, setActiveDraft] = useState<TriageAnalysis | null>(null);
+  const [draftText, setDraftText] = useState("");
+  const [regeneratingDraft, setRegeneratingDraft] = useState(false);
   const [toast, setToast] = useState("");
 
   const analyses = useMemo(() => analyzeMessages(messages), [messages]);
   const counts = useMemo(() => countByCategory(analyses), [analyses]);
   const flags = analyses.filter((item) => item.flag);
 
-  async function handleCopyBrief() {
-    await copyWithToast(buildPlainTextBrief(analyses), "Brief copied");
+  function handleOpenDraft(analysis: TriageAnalysis) {
+    setActiveDraft(analysis);
+    setDraftText(analysis.draft || "No response needed.");
+    setRegeneratingDraft(false);
   }
 
-  async function handleCopyDraft(text: string) {
-    await copyWithToast(text || "No response needed.", "Draft reply copied");
-  }
-
-  async function copyWithToast(text: string, successMessage: string) {
+  async function handleRegenerateDraft() {
+    if (!activeDraft) return;
+    setRegeneratingDraft(true);
     try {
-      await copyText(text);
-      setToast(successMessage);
-    } catch {
-      setToast("Clipboard unavailable");
+      const nextDraft = await regenerateDraft(activeDraft, draftText);
+      setDraftText(nextDraft);
+      setToast("Draft regenerated");
+    } catch (error) {
+      setToast(error instanceof Error ? error.message : "Could not regenerate draft");
+    } finally {
+      setRegeneratingDraft(false);
     }
+  }
+
+  function handleSendDraft() {
+    setActiveDraft(null);
+    setDraftText("");
+    setRegeneratingDraft(false);
+    setToast("Message sent");
   }
 
   async function handleUpload(file: File) {
@@ -48,15 +62,10 @@ export function ExecutiveDashboard({ initialMessages }: ExecutiveDashboardProps)
       if (!Array.isArray(parsed)) throw new Error("Expected an array of messages");
       setMessages(parsed);
       setActiveFilter("all");
-      setExpandedId(null);
       setToast("New message set analyzed with available backend results");
     } catch (error) {
       setToast(error instanceof Error ? error.message : "Could not load JSON");
     }
-  }
-
-  function handleToggleExpanded(id: number) {
-    setExpandedId((currentId) => (currentId === id ? null : id));
   }
 
   return (
@@ -64,21 +73,39 @@ export function ExecutiveDashboard({ initialMessages }: ExecutiveDashboardProps)
       <DailyBriefHeader
         counts={counts}
         flagCount={flags.length}
-        onCopyBrief={() => void handleCopyBrief()}
         onUpload={(file) => void handleUpload(file)}
       />
 
       <main>
-        <BriefSummary analyses={analyses} />
+        <BriefSummary />
         <BriefFilters activeFilter={activeFilter} counts={counts} total={analyses.length} onFilterChange={setActiveFilter} />
         <BriefEntryList
           analyses={analyses}
           activeFilter={activeFilter}
-          expandedId={expandedId}
-          onCopyDraft={handleCopyDraft}
-          onToggleExpanded={handleToggleExpanded}
+          onOpenDetails={setActiveDetails}
+          onOpenDraft={handleOpenDraft}
         />
       </main>
+
+      {activeDetails ? (
+        <MessageDetailModal
+          analysis={activeDetails}
+          onClose={() => setActiveDetails(null)}
+          onOpenDraft={handleOpenDraft}
+        />
+      ) : null}
+
+      {activeDraft ? (
+        <DraftComposer
+          analysis={activeDraft}
+          draftText={draftText}
+          regenerating={regeneratingDraft}
+          onChangeDraft={setDraftText}
+          onClose={() => setActiveDraft(null)}
+          onRegenerate={handleRegenerateDraft}
+          onSend={handleSendDraft}
+        />
+      ) : null}
 
       <Toast message={toast} onDone={() => setToast("")} />
     </div>
