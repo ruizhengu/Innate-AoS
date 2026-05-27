@@ -8,12 +8,12 @@ Basic full-stack skeleton for the AI Chief of Staff take-home assessment.
 backend/
   src/aos/          Python backend source
   tests/            Backend tests
-  examples/         Backend smoke-test scripts
+  evaluation/       Manual evaluation set
 frontend/
-  src/              Frontend source placeholder
+  src/              Frontend source
 ```
 
-## Z.AI GLM 5.1 API Skeleton
+## Z.AI Backend
 
 The provider integration lives in `backend/src/aos/llm/zai_client.py`. It is
 deliberately kept separate from any triage, delegation, or briefing logic so the
@@ -23,9 +23,10 @@ It uses Z.AI's OpenAI-compatible chat completions endpoint:
 
 - Base URL: `https://api.z.ai/api/paas/v4`
 - Endpoint: `/chat/completions`
-- Default model: `glm-5.1`
+- Default model: `glm-5-turbo`
 
-Reference: <https://docs.z.ai/guides/llm/glm-5.1>
+References: <https://docs.z.ai/guides/llm/glm-5-turbo> and
+<https://docs.z.ai/guides/llm/glm-5.1>
 
 ## Setup
 
@@ -50,19 +51,96 @@ cd backend
 uv run python -m unittest discover -s tests
 ```
 
-## Try a Real Basic Call
+## Classify Messages
 
-After setting `ZAI_API_KEY`:
+Classify the sample inbox into `Ignore`, `Delegate`, and `Decide`:
 
 ```bash
 cd backend
-uv run aos-basic-chat
+uv run aos-triage ../Messages.json
 ```
 
-Expected result: one short sentence from GLM 5.1 confirming the integration is
-working.
+The CLI classifies in batches of 5 messages, disables thinking mode, and uses a
+180 second request timeout by default. This avoids one slow full-inbox request
+blocking the whole pipeline. Progress logs go to stderr, so redirecting stdout
+still gives clean JSON:
 
-## Example Usage in Future App Code
+```bash
+cd backend
+uv run aos-triage ../Messages.json > triage-results.json
+```
+
+If the API is still slow, reduce the batch size before raising the timeout:
+
+```bash
+cd backend
+uv run aos-triage ../Messages.json --batch-size 3 --timeout 240 > triage-results.json
+```
+
+For a quick live smoke test:
+
+```bash
+cd backend
+uv run aos-triage ../Messages.json --limit 3
+```
+
+The backend defaults to `glm-5-turbo` because it produced more reliable
+structured output and slightly better latency in the sample benchmark. You can
+still force another model when needed:
+
+```bash
+cd backend
+uv run aos-triage ../Messages.json --model glm-5.1
+```
+
+Compare GLM 5.1 and GLM 5 Turbo latency and output quality:
+
+```bash
+cd backend
+uv run aos-benchmark-models ../Messages.json --output benchmark-results.json
+```
+
+## Manual Evaluation
+
+Start with the small hand-labeled set in
+`backend/evaluation/manual_triage_set.json`. It checks representative cases for:
+investor decisions, phishing/noise, delegation, explicit sign-off, urgent
+production risk, and calendar logistics.
+
+Suggested review loop:
+
+```bash
+cd backend
+uv run aos-triage ../Messages.json > triage-results.json
+```
+
+Then compare `triage-results.json` against
+`evaluation/manual_triage_set.json`:
+
+- Does the category match?
+- Does `reason` explain the category in CEO-action terms?
+- Is at least one evidence snippet copied directly from the message?
+- Is the drafted response safe and realistic?
+- Are uncertain or risky items surfaced instead of hidden?
+
+## Run the Frontend
+
+The CEO-facing web UI is a Next.js app in `frontend/`:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Then open <http://localhost:3000>. It ships with the provided `Messages.json`
+data embedded so reviewers can see the dashboard immediately. Use **Load JSON**
+in the top right to test another message file with the same array schema. The
+browser-side analyzer provides an instant demo path, while the backend
+`aos-triage` command remains the LLM-backed path for production-quality
+classifications.
+
+## Example Usage in Future Backend Code
 
 ```python
 from aos.llm import ZaiChatClient, ZaiConfig

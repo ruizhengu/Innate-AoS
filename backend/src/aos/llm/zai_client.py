@@ -30,9 +30,9 @@ class ChatMessage:
 @dataclass(frozen=True)
 class ZaiConfig:
     api_key: str
-    model: str = "glm-5.1"
+    model: str = "glm-5-turbo"
     base_url: str = "https://api.z.ai/api/paas/v4"
-    timeout_seconds: float = 60.0
+    timeout_seconds: float = 180.0
 
     @classmethod
     def from_env(cls, env_file: str | os.PathLike[str] | None = ".env") -> "ZaiConfig":
@@ -47,6 +47,9 @@ class ZaiConfig:
             api_key=api_key,
             model=os.environ.get("ZAI_MODEL", cls.model),
             base_url=os.environ.get("ZAI_BASE_URL", cls.base_url).rstrip("/"),
+            timeout_seconds=float(
+                os.environ.get("ZAI_TIMEOUT_SECONDS", cls.timeout_seconds)
+            ),
         )
 
 
@@ -127,6 +130,8 @@ class ZaiChatClient:
                     yield json.loads(data)
         except HTTPError as error:
             raise ZaiApiError(self._format_http_error(error)) from error
+        except TimeoutError as error:
+            raise ZaiApiError("Z.AI request timed out.") from error
         except URLError as error:
             raise ZaiApiError(f"Could not reach Z.AI: {error.reason}") from error
 
@@ -157,6 +162,8 @@ class ZaiChatClient:
                 return json.loads(response.read().decode("utf-8"))
         except HTTPError as error:
             raise ZaiApiError(self._format_http_error(error)) from error
+        except TimeoutError as error:
+            raise ZaiApiError("Z.AI request timed out.") from error
         except URLError as error:
             raise ZaiApiError(f"Could not reach Z.AI: {error.reason}") from error
 

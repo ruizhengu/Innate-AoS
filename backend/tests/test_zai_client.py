@@ -57,7 +57,7 @@ class ZaiClientTests(unittest.TestCase):
             captured["url"], "https://api.z.ai/api/paas/v4/chat/completions"
         )
         self.assertEqual(captured["headers"]["Authorization"], "Bearer test-key")
-        self.assertEqual(captured["body"]["model"], "glm-5.1")
+        self.assertEqual(captured["body"]["model"], "glm-5-turbo")
         self.assertEqual(captured["body"]["thinking"], {"type": "disabled"})
         self.assertEqual(captured["body"]["messages"][0]["content"], "Hello")
         self.assertEqual(captured["body"]["max_tokens"], 128)
@@ -89,6 +89,12 @@ class ZaiClientTests(unittest.TestCase):
 
         self.assertEqual(config.api_key, "file-key")
         self.assertEqual(config.model, "glm-5.1")
+
+    def test_config_defaults_to_turbo(self):
+        with patch.dict(os.environ, {"ZAI_API_KEY": "test-key"}, clear=True):
+            config = ZaiConfig.from_env(env_file=None)
+
+        self.assertEqual(config.model, "glm-5-turbo")
 
 
 if __name__ == "__main__":

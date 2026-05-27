@@ -6,7 +6,8 @@ requires-python = ">=3.10"
 dependencies = []
 
 [project.scripts]
-aos-basic-chat = "aos.app:main"
+aos-triage = "aos.triage.cli:main"
+aos-benchmark-models = "aos.triage.benchmark:main"
 
 [build-system]
 requires = ["setuptools>=68"]
