@@ -1,12 +1,16 @@
-import { curatedAnalysisByMessageId } from "@/data/curatedAnalysis";
-import type { CategoryCounts, IncomingMessage, TriageAnalysis } from "@/types/message";
+import backendTriageResults from "@/data/triageResults.json";
+import type { BackendTriageResult, CategoryCounts, IncomingMessage, TriageAnalysis } from "@/types/message";
 import { truncate } from "./format";
+
+const backendAnalysisByMessageId = new Map(
+  (backendTriageResults as BackendTriageResult[]).map((result) => [result.message_id, result]),
+);
 
 export function analyzeMessages(messages: IncomingMessage[]): TriageAnalysis[] {
   return messages.map((message) => {
-    const curated = curatedAnalysisByMessageId[message.id];
-    if (curated) return { ...message, ...curated };
-    return { ...message, ...classifyByRules(message) };
+    const backendResult = backendAnalysisByMessageId.get(message.id);
+    if (backendResult) return { ...message, ...fromBackendResult(backendResult) };
+    return { ...message, ...classifyByRules(message), source: "fallback" };
   });
 }
 
@@ -83,6 +87,18 @@ function classifyByRules(message: IncomingMessage): Omit<TriageAnalysis, keyof I
     evidence: [truncate(message.body, 80)],
     owner: "None",
     draft: "No response needed.",
+  };
+}
+
+function fromBackendResult(result: BackendTriageResult): Omit<TriageAnalysis, keyof IncomingMessage> {
+  return {
+    category: result.category,
+    confidence: result.confidence,
+    reason: result.reason,
+    evidence: result.evidence,
+    owner: result.suggested_owner || "Unassigned",
+    draft: result.drafted_response || "No response needed.",
+    source: "backend",
   };
 }
 

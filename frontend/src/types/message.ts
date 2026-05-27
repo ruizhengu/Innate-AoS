@@ -21,6 +21,17 @@ export interface TriageAnalysis extends IncomingMessage {
   owner: string;
   draft: string;
   flag?: string;
+  source?: "backend" | "fallback";
 }
 
 export type CategoryCounts = Record<TriageCategory, number>;
+
+export interface BackendTriageResult {
+  message_id: number;
+  category: TriageCategory;
+  confidence: "high" | "medium" | "low";
+  reason: string;
+  evidence: string[];
+  suggested_owner: string;
+  drafted_response: string;
+}

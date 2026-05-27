@@ -84,6 +84,18 @@ cd backend
 uv run aos-triage ../Messages.json --limit 3
 ```
 
+To refresh the frontend with backend-processed triage data:
+
+```bash
+cd backend
+uv run aos-refresh-frontend-triage
+```
+
+Avoid redirecting directly into `frontend/src/data/triageResults.json` while the
+Next dev server is running; shell redirection temporarily empties the file before
+the LLM call completes. The refresh command writes a temporary file and swaps it
+into place only after valid JSON is ready.
+
 The backend defaults to `glm-5-turbo` because it produced more reliable
 structured output and slightly better latency in the sample benchmark. You can
 still force another model when needed:
