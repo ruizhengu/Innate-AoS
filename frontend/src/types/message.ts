@@ -2,6 +2,8 @@ export type MessageChannel = "email" | "slack" | "whatsapp" | string;
 
 export type TriageCategory = "Ignore" | "Delegate" | "Decide";
 
+export type BriefFilter = TriageCategory | "all" | "archive";
+
 export interface IncomingMessage {
   id: number;
   channel: MessageChannel;
@@ -25,6 +27,12 @@ export interface TriageAnalysis extends IncomingMessage {
 }
 
 export type CategoryCounts = Record<TriageCategory, number>;
+
+export interface MessageWorkflowState {
+  archived?: boolean;
+  assignedTo?: string;
+  completed?: boolean;
+}
 
 export interface BackendTriageResult {
   message_id: number;

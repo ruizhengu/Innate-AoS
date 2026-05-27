@@ -3,18 +3,24 @@ import type { TriageAnalysis } from "@/types/message";
 
 interface DraftComposerProps {
   analysis: TriageAnalysis;
+  assignee: string;
   draftText: string;
   regenerating: boolean;
+  onChangeAssignee: (value: string) => void;
   onChangeDraft: (value: string) => void;
   onClose: () => void;
   onRegenerate: () => Promise<void>;
   onSend: () => void;
 }
 
+const delegateAssignees = ["Ben", "Sam", "José"];
+
 export function DraftComposer({
   analysis,
+  assignee,
   draftText,
   regenerating,
+  onChangeAssignee,
   onChangeDraft,
   onClose,
   onRegenerate,
@@ -39,10 +45,27 @@ export function DraftComposer({
         </header>
 
         <div className="draft-meta">
-          <div>
-            <span className="detail-label">To</span>
-            <p>{analysis.from}</p>
-          </div>
+          {analysis.category === "Delegate" ? (
+            <label className="assignee-field">
+              <span className="detail-label">Assign to</span>
+              <select
+                disabled={regenerating}
+                value={assignee}
+                onChange={(event) => onChangeAssignee(event.target.value)}
+              >
+                {delegateAssignees.map((person) => (
+                  <option key={person} value={person}>
+                    {person}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <div>
+              <span className="detail-label">To</span>
+              <p>{analysis.from}</p>
+            </div>
+          )}
           <div>
             <span className="detail-label">Why</span>
             <p>{analysis.reason}</p>
@@ -75,7 +98,7 @@ export function DraftComposer({
             Regenerate
           </button>
           <button className="entry-action primary" type="button" disabled={regenerating} onClick={onSend}>
-            Send
+            {analysis.category === "Delegate" ? "Send Handoff" : "Send"}
           </button>
         </footer>
       </section>

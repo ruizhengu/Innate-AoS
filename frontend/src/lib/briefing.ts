@@ -28,17 +28,10 @@ export function buildBriefingPreview(): BriefingLine {
   };
 }
 
-function buildFlagLines(): BriefingLine[] {
+export function buildFlagLines(): BriefingLine[] {
   return generatedBriefing.flags.map((flag) => ({
     label: `${titleCase(flag.severity)} risk:`,
     body: flag.summary,
-  }));
-}
-
-function buildNextActionLines(): BriefingLine[] {
-  return generatedBriefing.next_actions.map((item) => ({
-    label: `${item.owner}:`,
-    body: item.action,
   }));
 }
 
@@ -47,14 +40,6 @@ export function buildBriefingSections(): { title: string; lines: BriefingLine[] 
     {
       title: "Brief",
       lines: buildBriefing(),
-    },
-    {
-      title: "Flags",
-      lines: buildFlagLines(),
-    },
-    {
-      title: "Next Actions",
-      lines: buildNextActionLines(),
     },
   ];
 }
