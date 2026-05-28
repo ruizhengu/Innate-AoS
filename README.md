@@ -1,34 +1,36 @@
-# Innate-AoS
+# Innate AoS
 
-Basic full-stack skeleton for the AI Chief of Staff take-home assessment.
+AI Chief of Staff take-home assessment.
 
-## Project Layout
+This app lets a CEO upload a message JSON file, triage every message with Z.AI,
+and review the inbox as a progressively updating daily brief.
 
-```text
-backend/
-  src/aos/          Python backend source
-  tests/            Backend tests
-  evaluation/       Manual evaluation set
-frontend/
-  src/              Frontend source
-```
+## What It Does
 
-## Z.AI Backend
+- Upload a JSON inbox file from the web UI.
+- Classify each message as `Ignore`, `Delegate`, or `Decide`.
+- Stream completed triage batches into the UI while later batches are still processing.
+- Show the reason and evidence behind each classification.
+- Generate a daily briefing and risk flags after all messages are triaged.
+- Open a draft reply composer for each message.
+- Regenerate draft replies through the backend LLM API.
 
-The provider integration lives in `backend/src/aos/llm/zai_client.py`. It is
-deliberately kept separate from any triage, delegation, or briefing logic so the
-rest of the project can adapt it later.
+## Requirements
 
-It uses Z.AI's OpenAI-compatible chat completions endpoint:
+- Python 3.10+
+- [uv](https://docs.astral.sh/uv/)
+- Node.js 20+
+- npm
+- A Z.AI API key
+
+The backend uses Z.AI's OpenAI-compatible chat completions API:
 
 - Base URL: `https://api.z.ai/api/paas/v4`
-- Endpoint: `/chat/completions`
 - Default model: `glm-5-turbo`
 
-References: <https://docs.z.ai/guides/llm/glm-5-turbo> and
-<https://docs.z.ai/guides/llm/glm-5.1>
-
 ## Setup
+
+Install backend dependencies:
 
 ```bash
 cd backend
@@ -36,134 +38,115 @@ uv sync
 cp .env.example .env
 ```
 
-Add your real key to `backend/.env`, or export it directly before running:
+Add your Z.AI API key to `backend/.env`:
 
 ```bash
-export ZAI_API_KEY="your-zai-api-key"
+ZAI_API_KEY=your-zai-api-key
+ZAI_MODEL=glm-5-turbo
+ZAI_BASE_URL=https://api.z.ai/api/paas/v4
+ZAI_TIMEOUT_SECONDS=180
 ```
 
-## Run the Mocked Tests
-
-These tests do not call the real Z.AI API.
+Install frontend dependencies:
 
 ```bash
-cd backend
-uv run python -m unittest discover -s tests
+cd ../frontend
+npm install
 ```
 
-## Classify Messages
-
-Classify the sample inbox into `Ignore`, `Delegate`, and `Decide`:
+Return to the project root:
 
 ```bash
-cd backend
-uv run aos-triage ../Messages.json
+cd ..
 ```
 
-The CLI classifies in batches of 5 messages, disables thinking mode, and uses a
-180 second request timeout by default. This avoids one slow full-inbox request
-blocking the whole pipeline. Progress logs go to stderr, so redirecting stdout
-still gives clean JSON:
+## Run The App
 
-```bash
-cd backend
-uv run aos-triage ../Messages.json > triage-results.json
-```
+Use two terminals so the backend and frontend logs stay easy to read.
 
-If the API is still slow, reduce the batch size before raising the timeout:
-
-```bash
-cd backend
-uv run aos-triage ../Messages.json --batch-size 3 --timeout 240 > triage-results.json
-```
-
-For a quick live smoke test:
-
-```bash
-cd backend
-uv run aos-triage ../Messages.json --limit 3
-```
-
-The backend defaults to `glm-5-turbo` because it produced more reliable
-structured output and slightly better latency in the sample benchmark. You can
-still force another model when needed:
-
-```bash
-cd backend
-uv run aos-triage ../Messages.json --model glm-5.1
-```
-
-Compare GLM 5.1 and GLM 5 Turbo latency and output quality:
-
-```bash
-cd backend
-uv run aos-benchmark-models ../Messages.json --output benchmark-results.json
-```
-
-Generate the daily briefing from existing triage results:
-
-```bash
-cd backend
-uv run aos-generate-briefing --triage triage-results.json --output daily-briefing.json
-```
-
-## Manual Evaluation
-
-Start with the small hand-labeled set in
-`backend/evaluation/manual_triage_set.json`. It checks representative cases for:
-investor decisions, phishing/noise, delegation, explicit sign-off, urgent
-production risk, and calendar logistics.
-
-Suggested review loop:
-
-```bash
-cd backend
-uv run aos-triage ../Messages.json > triage-results.json
-```
-
-Then compare `triage-results.json` against
-`evaluation/manual_triage_set.json`:
-
-- Does the category match?
-- Does `reason` explain the category in CEO-action terms?
-- Is at least one evidence snippet copied directly from the message?
-- Is the drafted response safe and realistic?
-- Are uncertain or risky items surfaced instead of hidden?
-
-## Run the Frontend
-
-The CEO-facing web UI is a Next.js app in `frontend/`. Start the Python backend
-API first; the frontend sends uploaded JSON to this service for live triage,
-daily briefing generation, flags, and draft regeneration:
+Terminal 1, start the backend API:
 
 ```bash
 cd backend
 uv run aos-api
 ```
 
-Then start the frontend in another terminal:
+Terminal 2, start the frontend:
 
 ```bash
 cd frontend
-npm install
 npm run dev
 ```
 
-Then open <http://localhost:3000>. The dashboard starts empty. Use **Load JSON**
-to upload `Messages.json` or another file with the same array schema. Triage
-results stream in by batch as they complete; the daily briefing and flags are
-generated only after all message batches finish.
+Then open the app:
 
-## Example Usage in Future Backend Code
-
-```python
-from aos.llm import ZaiChatClient, ZaiConfig
-
-client = ZaiChatClient(ZaiConfig.from_env())
-reply = client.complete_text(
-    "Summarize this message in one sentence: Board deck review moved to next week.",
-    system_prompt="You are an assistant for a CEO.",
-    thinking_enabled=False,
-)
-print(reply)
+```text
+http://localhost:3000
 ```
+
+The backend runs on `http://127.0.0.1:8000`, and the frontend runs on
+`http://localhost:3000`.
+
+## End-To-End Test Flow
+
+1. Open `http://localhost:3000`.
+2. Click `Load JSON`.
+3. Select the root-level `Messages.json` file.
+4. Watch message rows appear as pending.
+5. As each backend batch finishes, completed triage cards replace pending rows.
+6. Wait for the daily briefing and flags to finish after all messages are triaged.
+7. Click `Details` on a message to inspect reason and evidence.
+8. Click `Draft Reply` to open the floating reply composer.
+9. Click `Regenerate` to call the backend draft endpoint.
+10. Click `Send` to close the composer with a simulated send confirmation.
+
+## Useful Commands
+
+Run backend tests only:
+
+```bash
+cd backend
+uv run python -m unittest discover -s tests
+```
+
+Run frontend checks only:
+
+```bash
+cd frontend
+npm run typecheck
+npm run lint
+npm run build
+```
+
+Run the backend API:
+
+```bash
+cd backend
+uv run aos-api
+```
+
+Run the frontend:
+
+```bash
+cd frontend
+npm run dev
+```
+
+## Project Layout
+
+```text
+backend/
+  src/aos/          Python backend, Z.AI client, triage, briefing, draft APIs
+  tests/            Backend unit tests
+frontend/
+  src/              Next.js frontend
+Messages.json       Sample inbox for end-to-end testing
+```
+
+## Notes
+
+- Triage runs in batches of 4 messages to reduce timeout risk and improve
+  perceived latency.
+- Daily briefing and flags are generated only after all message batches finish,
+  because they need the full inbox context.
+- The `Send` button is intentionally simulated for this assessment version.

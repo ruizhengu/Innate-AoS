@@ -18,7 +18,7 @@ export async function streamTriage(
   const response = await fetch(`${apiBaseUrl()}/api/triage-stream`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages, batch_size: 5, retries: 1 }),
+    body: JSON.stringify({ messages, batch_size: 4, retries: 1 }),
   });
 
   if (!response.ok || !response.body) {
