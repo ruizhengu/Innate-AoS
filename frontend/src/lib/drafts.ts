@@ -1,10 +1,8 @@
 import type { TriageAnalysis } from "@/types/message";
-
-const DEFAULT_API_URL = "http://127.0.0.1:8000";
+import { apiBaseUrl } from "./api";
 
 export async function regenerateDraft(analysis: TriageAnalysis, currentDraft: string): Promise<string> {
-  const baseUrl = process.env.NEXT_PUBLIC_AOS_API_URL || DEFAULT_API_URL;
-  const response = await fetch(`${baseUrl}/api/draft-reply`, {
+  const response = await fetch(`${apiBaseUrl()}/api/draft-reply`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

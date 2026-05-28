@@ -44,6 +44,15 @@ export interface BackendTriageResult {
   drafted_response: string;
 }
 
+export type MessageProcessingStatus = "pending" | "complete" | "failed";
+
+export interface MessageProcessingItem {
+  message: IncomingMessage;
+  analysis?: TriageAnalysis;
+  status: MessageProcessingStatus;
+  error?: string;
+}
+
 export interface DailyBriefingItem {
   title?: string;
   summary: string;
@@ -69,3 +78,30 @@ export interface DailyBriefing {
   flags: DailyBriefingFlag[];
   next_actions: DailyBriefingAction[];
 }
+
+export type TriageStreamEvent =
+  | {
+      type: "started";
+      total: number;
+      batch_size: number;
+      total_batches: number;
+    }
+  | {
+      type: "batch_started";
+      batch: number;
+      message_ids: number[];
+    }
+  | {
+      type: "batch_completed";
+      batch: number;
+      message_ids: number[];
+      results: BackendTriageResult[];
+    }
+  | {
+      type: "completed";
+      results: BackendTriageResult[];
+    }
+  | {
+      type: "error";
+      error: string;
+    };

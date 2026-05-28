@@ -146,6 +146,10 @@ h1 {
   box-shadow: var(--shadow);
 }
 
+.summary-strip.muted {
+  box-shadow: none;
+}
+
 .summary-headline {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -224,6 +228,9 @@ h1 {
 
 .summary-open-button {
   flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid var(--coal);
   border-radius: 999px;
   padding: 8px 12px;
@@ -341,6 +348,18 @@ h1 {
   color: var(--green);
 }
 
+.classification-tag.Pending {
+  background: rgba(102, 115, 109, 0.12);
+  color: var(--muted);
+}
+
+.brief-entry.pending {
+  background:
+    linear-gradient(90deg, rgba(255, 254, 250, 0.76), rgba(245, 243, 237, 0.92), rgba(255, 254, 250, 0.76));
+  background-size: 220% 100%;
+  animation: pending-shimmer 1.6s ease-in-out infinite;
+}
+
 .tag-detail-button {
   width: 82px;
   border: 1px solid var(--line);
@@ -418,6 +437,55 @@ h1 {
 .icon-button:disabled {
   cursor: wait;
   opacity: 0.58;
+}
+
+.processing-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: rgba(255, 254, 250, 0.78);
+  color: var(--muted);
+}
+
+.processing-strip.compact {
+  margin-bottom: 0;
+  padding: 8px 10px;
+}
+
+.processing-strip p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.row-spinner {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(55, 93, 157, 0.18);
+  border-top-color: var(--blue);
+  border-radius: 999px;
+  animation: spin 800ms linear infinite;
+}
+
+.empty-state {
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  padding: 24px;
+  background: rgba(255, 254, 250, 0.58);
+  color: var(--muted);
+  text-align: center;
+}
+
+.empty-state strong {
+  color: var(--coal);
+}
+
+.empty-state p {
+  margin: 6px 0 0;
 }
 
 .detail-label {
@@ -754,6 +822,21 @@ h1 {
   50% {
     transform: translateY(-4px);
     opacity: 1;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pending-shimmer {
+  0% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -120% 0;
   }
 }
 

@@ -2,11 +2,32 @@
 
 import { useState } from "react";
 import { buildBriefingPreview, buildBriefingSections } from "@/lib/briefing";
+import type { DailyBriefing } from "@/types/message";
 
-export function BriefSummary() {
+interface BriefSummaryProps {
+  briefing: DailyBriefing | null;
+  loading: boolean;
+}
+
+export function BriefSummary({ briefing, loading }: BriefSummaryProps) {
   const [open, setOpen] = useState(false);
-  const preview = buildBriefingPreview();
-  const sections = buildBriefingSections();
+
+  if (!briefing) {
+    return (
+      <section className="summary-strip muted" aria-label="Daily brief highlights">
+        <div className="summary-headline">
+          <p>
+            <strong>Daily briefing:</strong>{" "}
+            {loading ? "Generating after message triage completes..." : "Upload messages to generate a CEO briefing."}
+          </p>
+          {loading ? <span className="row-spinner" aria-label="Preparing daily briefing" /> : null}
+        </div>
+      </section>
+    );
+  }
+
+  const preview = buildBriefingPreview(briefing);
+  const sections = buildBriefingSections(briefing);
 
   return (
     <section className="summary-strip" aria-label="Daily brief highlights">
@@ -20,7 +41,7 @@ export function BriefSummary() {
           type="button"
           onClick={() => setOpen(true)}
         >
-          Open full brief
+          Show full brief
         </button>
       </div>
 

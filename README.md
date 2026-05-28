@@ -84,18 +84,6 @@ cd backend
 uv run aos-triage ../Messages.json --limit 3
 ```
 
-To refresh the frontend with backend-processed triage data:
-
-```bash
-cd backend
-uv run aos-refresh-frontend-triage
-```
-
-Avoid redirecting directly into `frontend/src/data/triageResults.json` while the
-Next dev server is running; shell redirection temporarily empties the file before
-the LLM call completes. The refresh command writes a temporary file and swaps it
-into place only after valid JSON is ready.
-
 The backend defaults to `glm-5-turbo` because it produced more reliable
 structured output and slightly better latency in the sample benchmark. You can
 still force another model when needed:
@@ -117,13 +105,6 @@ Generate the daily briefing from existing triage results:
 ```bash
 cd backend
 uv run aos-generate-briefing --triage triage-results.json --output daily-briefing.json
-```
-
-Refresh the frontend daily briefing artifact:
-
-```bash
-cd backend
-uv run aos-refresh-frontend-briefing
 ```
 
 ## Manual Evaluation
@@ -152,8 +133,8 @@ Then compare `triage-results.json` against
 ## Run the Frontend
 
 The CEO-facing web UI is a Next.js app in `frontend/`. Start the Python backend
-API first if you want the **Regenerate** button in the draft composer to call
-Z.AI:
+API first; the frontend sends uploaded JSON to this service for live triage,
+daily briefing generation, flags, and draft regeneration:
 
 ```bash
 cd backend
@@ -168,11 +149,10 @@ npm install
 npm run dev
 ```
 
-Then open <http://localhost:3000>. It ships with the provided `Messages.json`
-data embedded so reviewers can see the dashboard immediately. Use **Load JSON**
-in the top right to test another message file with the same array schema. The
-browser-side analyzer provides an instant demo path, while `aos-triage` remains
-the LLM-backed path for production-quality classifications.
+Then open <http://localhost:3000>. The dashboard starts empty. Use **Load JSON**
+to upload `Messages.json` or another file with the same array schema. Triage
+results stream in by batch as they complete; the daily briefing and flags are
+generated only after all message batches finish.
 
 ## Example Usage in Future Backend Code
 

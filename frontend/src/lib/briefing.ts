@@ -1,4 +1,3 @@
-import dailyBriefing from "@/data/dailyBriefing.json";
 import type { DailyBriefing } from "@/types/message";
 
 export interface BriefingLine {
@@ -6,40 +5,38 @@ export interface BriefingLine {
   body: string;
 }
 
-const generatedBriefing = dailyBriefing as DailyBriefing;
-
-function buildBriefing(): BriefingLine[] {
+export function buildBriefing(briefing: DailyBriefing): BriefingLine[] {
   return [
     {
       label: "Top priority:",
-      body: generatedBriefing.top_priority.summary,
+      body: briefing.top_priority.summary,
     },
-    ...generatedBriefing.sections.map((section) => ({
+    ...briefing.sections.map((section) => ({
       label: `${section.title || "Briefing"}:`,
       body: section.summary,
     })),
   ];
 }
 
-export function buildBriefingPreview(): BriefingLine {
+export function buildBriefingPreview(briefing: DailyBriefing): BriefingLine {
   return {
     label: "Daily briefing:",
-    body: generatedBriefing.headline,
+    body: briefing.headline,
   };
 }
 
-export function buildFlagLines(): BriefingLine[] {
-  return generatedBriefing.flags.map((flag) => ({
+export function buildFlagLines(briefing: DailyBriefing): BriefingLine[] {
+  return briefing.flags.map((flag) => ({
     label: `${titleCase(flag.severity)} risk:`,
     body: flag.summary,
   }));
 }
 
-export function buildBriefingSections(): { title: string; lines: BriefingLine[] }[] {
+export function buildBriefingSections(briefing: DailyBriefing): { title: string; lines: BriefingLine[] }[] {
   return [
     {
       title: "Brief",
-      lines: buildBriefing(),
+      lines: buildBriefing(briefing),
     },
   ];
 }
