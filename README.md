@@ -2,8 +2,7 @@
 
 AI Chief of Staff take-home assessment.
 
-This app lets a CEO upload a message JSON file, triage every message with Z.AI,
-and review the inbox as a progressively updating daily brief.
+This app lets a CEO upload a message JSON file, triage every message with Z.AI, and review the inbox as a progressively updating daily brief.
 
 ## What It Does
 
@@ -132,6 +131,15 @@ cd frontend
 npm run dev
 ```
 
+## Assumptions And Approach
+
+- I treated the CEO workflow as the primary product path: upload messages, progressively review triage results, then read the final briefing.
+- I used GLM-5-Turbo as the default model after testing it against GLM-5.1 for this task; it gave a better balance of structured output quality and latency.
+- Triage is streamed in small batches so the first completed results appear before the entire inbox is finished. This improves the user experience by
+  avoiding a long wait before any action is possible, while keeping batch sizes large enough to avoid excessive LLM API calls.
+- Daily briefing and flags are generated after all triage results are available, because both need the full morning context.
+- The draft composer is intentionally a product prototype: regeneration calls the backend LLM, while `Send` is simulated rather than connected to email/Slack.
+
 ## Project Layout
 
 ```text
@@ -142,11 +150,3 @@ frontend/
   src/              Next.js frontend
 Messages.json       Sample inbox for end-to-end testing
 ```
-
-## Notes
-
-- Triage runs in batches of 4 messages to reduce timeout risk and improve
-  perceived latency.
-- Daily briefing and flags are generated only after all message batches finish,
-  because they need the full inbox context.
-- The `Send` button is intentionally simulated for this assessment version.
